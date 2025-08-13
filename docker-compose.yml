@@ -1,28 +1,47 @@
+version: '3.7'
+
 services:
   gabit_backend:
     image: ghcr.io/gabit315/gabit_backend:latest
+    environment:
+      TZ: "Asia/Almaty"
+      HTTP_LISTEN: ":3000"            # порт, который слушает приложение внутри контейнера
+      SWAG_HOST: "api.gabit.test.mdev.kz"
+      SWAG_BASE_PATH: "/"
     deploy:
-      labels:
-        - traefik.enable=true
-        - traefik.http.routers.gabit_backend.entrypoints=https
-        - traefik.http.routers.gabit_backend.rule=Host(`api.gabit.test.mdev.kz`)
-        - traefik.http.routers.gabit_backend.tls.certresolver=httpresolver
-        - traefik.http.services.gabit_backend.loadbalancer.server.port=3000
+      replicas: 1
+      resources:
+        limits:
+          memory: 500MB
+      update_config:
+        order: start-first
+        failure_action: rollback
+        delay: 5s
+      rollback_config:
+        parallelism: 0
+        order: stop-first
     networks:
-      - traefik
+      - services
 
   gabit_frontend:
     image: ghcr.io/gabit315/gabit_frontend:latest
+    environment:
+      TZ: "Asia/Almaty"
+      API_URL: https://api.gabit.test.mdev.kz
     deploy:
+      replicas: 1
       labels:
-        - traefik.enable=true
-        - traefik.http.routers.gabit_frontend.entrypoints=https
-        - traefik.http.routers.gabit_frontend.rule=Host(`gabit.test.mdev.kz`)
-        - traefik.http.routers.gabit_frontend.tls.certresolver=httpresolver
-        - traefik.http.services.gabit_frontend.loadbalancer.server.port=80
+        - "traefik.enable=true"
+        - "traefik.http.services.gabit_frontend.loadbalancer.server.port=80"
+        - "traefik.http.routers.gabit_frontend.entrypoints=https"
+        - "traefik.http.routers.gabit_frontend.rule=Host(`gabit.test.mdev.kz`)"
+        - "traefik.http.routers.gabit_frontend.tls.certresolver=httpresolver"
     networks:
       - traefik
+      - services
 
 networks:
+  services:
+    external: true
   traefik:
     external: true
