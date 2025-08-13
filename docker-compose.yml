@@ -1,6 +1,6 @@
 services:
   gabit_backend:
-    image: gabit315/gabit_backend:latest
+    image: ghcr.io/gabit315/gabit_backend:latest
     deploy:
       labels:
         - traefik.enable=true
@@ -12,7 +12,7 @@ services:
       - traefik
 
   gabit_frontend:
-    image: gabit315/gabit_frontend:latest
+    image: ghcr.io/gabit315/gabit_frontend:latest
     deploy:
       labels:
         - traefik.enable=true
