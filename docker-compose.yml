@@ -1,0 +1,28 @@
+services:
+  gabit_backend:
+    image: gabit315/gabit_backend:latest
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.gabit_backend.entrypoints=https
+        - traefik.http.routers.gabit_backend.rule=Host(`api.gabit.test.mdev.kz`)
+        - traefik.http.routers.gabit_backend.tls.certresolver=httpresolver
+        - traefik.http.services.gabit_backend.loadbalancer.server.port=3000
+    networks:
+      - traefik
+
+  gabit_frontend:
+    image: gabit315/gabit_frontend:latest
+    deploy:
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.gabit_frontend.entrypoints=https
+        - traefik.http.routers.gabit_frontend.rule=Host(`gabit.test.mdev.kz`)
+        - traefik.http.routers.gabit_frontend.tls.certresolver=httpresolver
+        - traefik.http.services.gabit_frontend.loadbalancer.server.port=80
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    external: true
