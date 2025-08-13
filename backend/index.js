@@ -20,23 +20,31 @@ app.post('/login', (req, res) => {
   const user = USERS.find(u => u.username === username && u.password === password);
 
   if (!user) {
-    return res.status(401).json({ message: 'Invalid credentials' });
+    return res.status(401).json({ message: 'Password incorrect' });
   }
 
   const token = jwt.sign({ id: user.id, username: user.username }, SECRET, { expiresIn: '1h' });
   res.json({ token });
 });
 
-// Protected route
-app.get('/protected', (req, res) => {
+// Show who is inside
+app.get('/me', (req, res) => {
   const authHeader = req.headers.authorization;
-  if (!authHeader) return res.sendStatus(401);
+  if (!authHeader) return res.status(401).json({ message: 'No token provided' });
 
   const token = authHeader.split(' ')[1];
   jwt.verify(token, SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    res.json({ message: `Welcome, ${user.username}!`, user });
+    if (err) return res.status(403).json({ message: 'Invalid token' });
+    res.json({ user });
   });
+});
+
+// Show raw token
+app.get('/token', (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ message: 'No token provided' });
+  const token = authHeader.split(' ')[1];
+  res.json({ token });
 });
 
 app.listen(3000, () => console.log('Backend running on port 3000'));

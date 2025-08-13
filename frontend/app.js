@@ -1,5 +1,4 @@
-const API_URL = "https://api.gabit.test.mdev.kz";
-
+const API_URL = "https://api.gabit.test.mdev.kz"; // URL backend через Traefik
 
 function login() {
   const username = document.getElementById('username').value;
@@ -16,14 +15,25 @@ function login() {
       localStorage.setItem('token', data.token);
       document.getElementById('status').innerText = "Logged in!";
     } else {
-      document.getElementById('status').innerText = "Login failed";
+      document.getElementById('status').innerText = data.message || "Login failed";
     }
   });
 }
 
-function getProtected() {
+function whoAmI() {
   const token = localStorage.getItem('token');
-  fetch(`${API_URL}/protected`, {
+  fetch(`${API_URL}/me`, {
+    headers: { "Authorization": `Bearer ${token}` }
+  })
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('status').innerText = JSON.stringify(data);
+  });
+}
+
+function showToken() {
+  const token = localStorage.getItem('token');
+  fetch(`${API_URL}/token`, {
     headers: { "Authorization": `Bearer ${token}` }
   })
   .then(res => res.json())
